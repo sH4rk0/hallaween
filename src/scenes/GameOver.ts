@@ -1,5 +1,5 @@
 import { leaderboard } from "../InitGame";
-import { NormalModuleReplacementPlugin } from "webpack";
+import SceneTransition from "../scenes/SceneTransition";
 
 export default class GameOver extends Phaser.Scene {
   _playerText: Phaser.GameObjects.BitmapText;
@@ -20,6 +20,7 @@ export default class GameOver extends Phaser.Scene {
   private _coffin: Phaser.GameObjects.Sprite;
   private _santa: Phaser.GameObjects.Sprite;
   private _deluca: Phaser.GameObjects.Sprite;
+  private _transition: SceneTransition;
 
   constructor() {
     super({
@@ -28,12 +29,10 @@ export default class GameOver extends Phaser.Scene {
   }
 
   create() {
-    // console.log("create gameover");
+    this._transition = <SceneTransition>this.scene.get("SceneTransition");
 
     this._win = this.registry.get("win");
     this.registry.set("win", false);
-
-    //this._win = true;
 
     this.input.keyboard.on("keydown-O", (event: Event) => {
       this.game.renderer.snapshot((image: any) => {
@@ -234,11 +233,14 @@ export default class GameOver extends Phaser.Scene {
     this.registry.set("level", 0);
     this.registry.set("finalscore", 0);
 
-    this._music.stop();
-    this.scene.stop("GameOver");
-    this.scene.stop("ScoreInput");
-    this.scene.start("Intro");
-    this.scene.bringToTop("Intro");
+    this._transition.appear(true, () => {
+      this._music.stop();
+      this.scene.stop("GameOver");
+      this.scene.stop("ScoreInput");
+      this.scene.start("Intro");
+      this.scene.bringToTop("Intro");
+      this.scene.bringToTop("SceneTransition");
+    });
   }
 
   step() {

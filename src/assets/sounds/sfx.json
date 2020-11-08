@@ -92,6 +92,12 @@
       "start": 23.065,
       "end": 24.6,
       "loop": false
+    },
+
+    "chebello": {
+      "start": 24.835,
+      "end": 25.386,
+      "loop": false
     }
   }
 }

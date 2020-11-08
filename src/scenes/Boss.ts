@@ -90,8 +90,8 @@ export default class Boss extends Phaser.GameObjects.Container {
     this._scene.events.off("gameover", this.gameOver, this);
     this._scene.events.on("gameover", this.gameOver, this);
 
-    this._scene.events.off("player-dead", this.stopActivities, this);
-    this._scene.events.on("player-dead", this.stopActivities, this);
+    this._scene.events.off("player-dead", this.playerDead, this);
+    this._scene.events.on("player-dead", this.playerDead, this);
 
     this._leftParticle = this._config.scene.add
       .particles("explosionParticles")
@@ -550,7 +550,17 @@ export default class Boss extends Phaser.GameObjects.Container {
 
   gameOver() {
     this.stopActivities();
-    this.destroy();
+    this._scene.removeBossItem(this);
+    this._scene._groupBoss.clear(true);
+    //this.destroy();
+  }
+
+  playerDead() {
+    this._scene.sound.playAudioSprite("sfx", "buaaa", {
+      loop: false,
+      volume: 0.25,
+    });
+    this.stopActivities();
   }
 
   secondCollider() {
@@ -565,6 +575,9 @@ export default class Boss extends Phaser.GameObjects.Container {
     if (this._actionTimer != undefined) this._actionTimer.remove();
     if (this._startTween != undefined) this._startTween.pause().remove();
     if (this._moveTween != undefined) this._moveTween.pause().remove();
+    this._darkParticle.stop();
+    this._whiteParticle.stop();
+    this._fireParticle.stop();
   }
 
   engineDown() {
@@ -687,8 +700,6 @@ export default class Boss extends Phaser.GameObjects.Container {
 
       this._scene.nextLevel();
       this._scene.bossDead();
-      //this._scene.events.emit("boss-dead");
-
       this._scene.removeBossItem(this);
       this._scene._groupBoss.clear(true);
     }

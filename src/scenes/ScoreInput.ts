@@ -5,6 +5,9 @@ export default class ScoreInput extends Phaser.Scene {
   private _charLimit: number;
   private _block: Phaser.GameObjects.Image;
   private _text: Phaser.GameObjects.BitmapText;
+  private _gamepad: Phaser.Input.Gamepad.Gamepad;
+  private _moved: boolean = false;
+  private _pressed: boolean = false;
 
   constructor() {
     super({
@@ -62,6 +65,42 @@ export default class ScoreInput extends Phaser.Scene {
       ease: "Sine.easeInOut",
       duration: 350,
     });
+  }
+
+  update(time: number, delta: number) {
+    if (this.input.gamepad.total > 0 && this._gamepad == undefined) {
+      this._gamepad = this.input.gamepad.gamepads[0];
+    } else if (this.input.gamepad.total > 0 && this._gamepad != undefined) {
+      if (this._gamepad.axes[0].getValue() == -1 && !this._moved) {
+        this.moveLeft();
+        this._moved = true;
+      } else if (this._gamepad.axes[0].getValue() == 1 && !this._moved) {
+        this.moveRight();
+        this._moved = true;
+      } else if (this._gamepad.axes[1].getValue() == -1 && !this._moved) {
+        this.moveUp();
+        this._moved = true;
+      } else if (this._gamepad.axes[1].getValue() == 1 && !this._moved) {
+        this.moveDown();
+        this._moved = true;
+      } else if (
+        this._gamepad.axes[0].getValue() == 0 &&
+        this._gamepad.axes[1].getValue() == 0
+      ) {
+        this._moved = false;
+      }
+
+      if (
+        this._gamepad != null &&
+        this._gamepad.buttons[0].value == 1 &&
+        !this._pressed
+      ) {
+        this._pressed = true;
+        this.pressKey();
+      } else if (this._gamepad != null && this._gamepad.buttons[0].value == 0) {
+        this._pressed = false;
+      }
+    }
   }
 
   moveBlock(pointer: Phaser.Input.Pointer, x: number, y: number) {

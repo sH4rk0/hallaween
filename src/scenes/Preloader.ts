@@ -1,23 +1,18 @@
-/**
- * @author       Francesco Raimondo <francesco.raimondo@gmail.com>
- * @copyright    2019 zero89
- * @description  Run4Mayor
- * @license      zero89
- */
 import { leaderboard } from "../InitGame";
 import { GameData } from "../GameData";
 
 export default class Preloader extends Phaser.Scene {
-  body: HTMLElement;
-  loading: Phaser.GameObjects.Text;
-  text: Phaser.GameObjects.Text;
-  progress: Phaser.GameObjects.Graphics;
-  _pumpkin: Array<Phaser.GameObjects.Image>;
-  _bg: Phaser.GameObjects.TileSprite;
-  _leaderboardIsActive: boolean;
-  _timer: Phaser.Time.TimerEvent;
-  _delucas: Phaser.GameObjects.Image;
-  _counter: number = 0;
+  private _loading: Phaser.GameObjects.Text;
+  private _text: Phaser.GameObjects.Text;
+  private _progress: Phaser.GameObjects.Graphics;
+  private _pumpkin: Array<Phaser.GameObjects.Image>;
+  private _bg: Phaser.GameObjects.TileSprite;
+  private _leaderboardIsActive: boolean;
+  private _timer: Phaser.Time.TimerEvent;
+  private _delucas: Phaser.GameObjects.Image;
+  private _counter: number = 0;
+  private _gamepad: Phaser.Input.Gamepad.Gamepad;
+  private _started: boolean;
 
   constructor() {
     super({
@@ -28,13 +23,28 @@ export default class Preloader extends Phaser.Scene {
   preload() {
     //this.cameras.main.setBackgroundColor('#f0e200')
     this.cameras.main.setBackgroundColor("#000000");
-    this.progress = this.add.graphics();
+    this._progress = this.add.graphics();
     this.loadAssets();
   }
 
-  update(time: number, delta: number) {}
+  update(time: number, delta: number) {
+    if (this.input.gamepad.total > 0 && this._gamepad == undefined) {
+      this._gamepad = this.input.gamepad.gamepads[0];
+      //console.log("update", this.input.gamepad.total, this._gamepad);
+    } else if (this.input.gamepad.total > 0 && this._gamepad != undefined) {
+      if (
+        this._gamepad != null &&
+        this._gamepad.buttons[0].value == 1 &&
+        !this._started
+      ) {
+        this._started = true;
+        this.startGame();
+      }
+    }
+  }
 
   init() {
+    this._started = false;
     this._leaderboardIsActive = false;
 
     this._delucas = this.add.image(640, 300, "thelucasart").setAlpha(0);
@@ -88,7 +98,7 @@ export default class Preloader extends Phaser.Scene {
       wordWrapWidth: 1000,
     };
 
-    this.loading = this.add
+    this._loading = this.add
       .text(this.game.canvas.width / 2, 520, "", _config)
       .setAlpha(1)
       .setFontFamily('"Press Start 2P"')
@@ -111,7 +121,7 @@ export default class Preloader extends Phaser.Scene {
       this._leaderboardIsActive = true;
 
       this.tweens.add({
-        targets: [this.text],
+        targets: [this._text],
         alpha: 1,
         x: 20,
         duration: 250,
@@ -119,14 +129,14 @@ export default class Preloader extends Phaser.Scene {
         delay: 200,
       });
 
-      this.loading.setText("Tap/click to start");
-      this.progress.clear();
+      this._loading.setText("Tap/click to start");
+      this._progress.clear();
 
       this.input.once("pointerdown", () => {
         this.tweens.add({
           targets: [
             this._delucas,
-            this.loading,
+            this._loading,
             this._pumpkin[0],
             this._pumpkin[1],
             this._pumpkin[2],
@@ -136,14 +146,24 @@ export default class Preloader extends Phaser.Scene {
           alpha: 0,
           duration: 500,
           onComplete: () => {
-            /* this.scene.start("GameOver");
+            this.startGame();
+          },
+        });
+      });
+    }
+  }
+
+  startGame() {
+    /*
+ this.scene.start("GameOver");
             this.scene.start("ScoreInput");
             this.scene.bringToTop("GameOver");
             this.scene.bringToTop("ScoreInput");
             return;
             */
 
-            /*this.scene.start("GamePlay");
+    /*
+            this.scene.start("GamePlay");
             this.scene.bringToTop("GamePlay");
             this.scene.start("Hud");
             this.scene.bringToTop("Hud");
@@ -151,26 +171,19 @@ export default class Preloader extends Phaser.Scene {
               this.scene.start("Joy");
               this.scene.bringToTop("Joy");
             }
+           
 
             return;
             */
 
-            const _best = localStorage.getItem("bestlevel");
+    // this.scene.start("GameOver");
+    // return;
 
-            if (_best != null && _best != undefined) {
-              this.registry.set("bestlevel", _best);
-            } else {
-              this.registry.set("bestlevel", 0);
-            }
+    //this.scene.start("Intro");
+    //this.registry.set("bestlevel", 0);
+    // return;
 
-            // this.scene.start("GameOver");
-            // return;
-
-            //this.scene.start("Intro");
-            //this.registry.set("bestlevel", 0);
-            // return;
-
-            /*   this.scene.start("GamePlay");
+    /*   this.scene.start("GamePlay");
             this.scene.bringToTop("GamePlay");
             this.scene.start("Hud");
             this.scene.bringToTop("Hud");
@@ -181,16 +194,21 @@ export default class Preloader extends Phaser.Scene {
 
             return;*/
 
-            const urlParams = new URLSearchParams(window.location.search);
+    const _best = localStorage.getItem("bestlevel");
 
-            if (urlParams.get("crack") === "fairlight") {
-              this.scene.start("Crack");
-            } else {
-              this.scene.start("Intro");
-            }
-          },
-        });
-      });
+    if (_best != null && _best != undefined) {
+      this.registry.set("bestlevel", _best);
+    } else {
+      this.registry.set("bestlevel", 0);
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+
+    if (urlParams.get("crack") === "fairlight") {
+      this.scene.start("Crack");
+    } else {
+      this.scene.start("Intro");
+      this.scene.bringToTop("SceneTransition");
     }
   }
 
@@ -202,10 +220,10 @@ export default class Preloader extends Phaser.Scene {
     });
 
     this.load.on("progress", (value: any) => {
-      this.progress.clear();
-      this.progress.fillStyle(0xf6af2f, 1);
-      this.progress.fillRect(0, 480, 1280 * value, 70);
-      this.loading.setText("Loading..." + Math.round(value * 100) + "%");
+      this._progress.clear();
+      this._progress.fillStyle(0xf6af2f, 1);
+      this._progress.fillRect(0, 480, 1280 * value, 70);
+      this._loading.setText("Loading..." + Math.round(value * 100) + "%");
     });
 
     this.load.on("complete", () => {

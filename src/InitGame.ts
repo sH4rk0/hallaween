@@ -9,6 +9,9 @@ import Crack from "./scenes/Crack";
 import GamePlay from "./scenes/GamePlay";
 import ScoreInput from "./scenes/ScoreInput";
 import Leaderboard from "./Leaderboard";
+import SceneTransition from "./scenes/SceneTransition";
+import { Scene } from "phaser";
+
 export let leaderboard: Leaderboard;
 
 window.addEventListener("load", () => {
@@ -33,6 +36,7 @@ window.addEventListener("load", () => {
       GamePlay,
       GameOver,
       ScoreInput,
+      SceneTransition,
     ],
     physics: {
       default: "arcade",
@@ -53,20 +57,18 @@ window.addEventListener("load", () => {
 
   const game = new Phaser.Game(config);
 
-  /*
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker
       .register("/sw.js", {
-        scope: "/"
+        scope: "/",
       })
       .then(
-        function(registration) {
+        function (registration) {
           //console.log("ServiceWorker registration successful with scope: ",registration.scope);
         },
-        function(err) {
+        function (err) {
           //console.log("ServiceWorker registration failed: ", err);
         }
       );
   }
-  */
 });

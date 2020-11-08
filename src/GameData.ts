@@ -210,6 +210,20 @@ export let GameData: any = {
           },
 
           {
+            d: 5000,
+            data: {
+              sw: {
+                quantity: 5,
+                delay: 200,
+                type: EnemyCases.batSimpleRightTween,
+                bonus: { type: "bonus-fire", enemy: 5 },
+                tween: { tweenY: 50, tweenDuration: 1000 },
+                y: 400,
+              },
+            },
+          },
+
+          {
             d: 10000,
             data: {
               sw: {
@@ -220,21 +234,7 @@ export let GameData: any = {
             },
           },
 
-          {
-            d: 1000,
-            data: {
-              sw: {
-                quantity: 5,
-                delay: 200,
-                type: EnemyCases.batSimpleRightTween,
-                bonus: { type: "milk", enemy: 5 },
-                tween: { tweenY: 100, tweenDuration: 1000 },
-                y: 400,
-              },
-            },
-          },
-
-          { d: 10000, data: EnemyCases.batSimpleRightTween },
+          { d: 1000, data: EnemyCases.batSimpleRightTween },
           { d: 1000, data: EnemyCases.batSimpleLeftTween },
           { d: 1000, data: EnemyCases.batSimpleRightTween },
           { d: 1000, data: EnemyCases.batSimpleLeftTween },
@@ -247,6 +247,20 @@ export let GameData: any = {
                 delay: 500,
                 type: EnemyCases.batSimpleRightTween,
                 bonus: null,
+              },
+            },
+          },
+
+          {
+            d: 5000,
+            data: {
+              sw: {
+                quantity: 5,
+                delay: 200,
+                type: EnemyCases.batSimpleRightTween,
+                bonus: { type: "bonus-velocity", enemy: 5 },
+                tween: { tweenY: 50, tweenDuration: 1000 },
+                y: 400,
               },
             },
           },
@@ -274,6 +288,20 @@ export let GameData: any = {
                 delay: 500,
                 type: EnemyCases.batSimpleRightTween,
                 bonus: null,
+              },
+            },
+          },
+
+          {
+            d: 5000,
+            data: {
+              sw: {
+                quantity: 5,
+                delay: 200,
+                type: EnemyCases.batSimpleRightTween,
+                bonus: { type: "bonus-damage", enemy: 5 },
+                tween: { tweenY: 50, tweenDuration: 1000 },
+                y: 400,
               },
             },
           },
@@ -342,6 +370,19 @@ export let GameData: any = {
               },
             },
           },
+          {
+            d: 1000,
+            data: {
+              sw: {
+                quantity: 5,
+                delay: 200,
+                type: EnemyCases.batSimpleRightTween,
+                bonus: { type: "bonus-damage", enemy: 5 },
+                tween: { tweenY: 50, tweenDuration: 1000 },
+                y: 400,
+              },
+            },
+          },
 
           {
             d: 10000,
@@ -356,19 +397,7 @@ export let GameData: any = {
           { d: 500, data: EnemyCases.batSimpleLeft },
           { d: 500, data: EnemyCases.ghostSimpleRight },
           { d: 500, data: EnemyCases.batSimpleLeft },
-          {
-            d: 1000,
-            data: {
-              sw: {
-                quantity: 5,
-                delay: 200,
-                type: EnemyCases.batSimpleRightTween,
-                bonus: { type: "milk", enemy: 5 },
-                tween: { tweenY: 100, tweenDuration: 1000 },
-                y: 200,
-              },
-            },
-          },
+
           { d: 500, data: EnemyCases.ghostSimpleRight },
           {
             d: 2000,
@@ -381,9 +410,19 @@ export let GameData: any = {
             },
           },
 
-          { d: 500, data: EnemyCases.ghostSimpleLeft },
-          { d: 500, data: EnemyCases.ghostSimpleRight },
-          { d: 500, data: EnemyCases.ghostSimpleLeft },
+          {
+            d: 2000,
+            data: {
+              sw: {
+                quantity: 5,
+                delay: 200,
+                type: EnemyCases.batSimpleRightTween,
+                bonus: { type: "bonus-velocity", enemy: 5 },
+                tween: { tweenY: 50, tweenDuration: 1000 },
+                y: 400,
+              },
+            },
+          },
 
           {
             d: 2000,
@@ -407,10 +446,19 @@ export let GameData: any = {
             },
           },
 
-          { d: 500, data: EnemyCases.ghostSimpleRight },
-          { d: 500, data: EnemyCases.ghostSimpleLeft },
-          { d: 500, data: EnemyCases.ghostSimpleRight },
-
+          {
+            d: 1500,
+            data: {
+              sw: {
+                quantity: 5,
+                delay: 200,
+                type: EnemyCases.batSimpleRightTween,
+                bonus: { type: "bonus-fire", enemy: 5 },
+                tween: { tweenY: 50, tweenDuration: 1000 },
+                y: 400,
+              },
+            },
+          },
           {
             d: 12000,
             data: {
@@ -449,12 +497,15 @@ export let GameData: any = {
             },
           },
           {
-            d: 10000,
+            d: 5000,
             data: {
               sw: {
-                quantity: 10,
-                delay: 1000,
-                type: EnemyCases.witchSimpleRightTween,
+                quantity: 5,
+                delay: 200,
+                type: EnemyCases.batSimpleRightTween,
+                bonus: { type: "bonus-damage", enemy: 5 },
+                tween: { tweenY: 50, tweenDuration: 1000 },
+                y: 400,
               },
             },
           },
@@ -482,9 +533,19 @@ export let GameData: any = {
             },
           },
 
-          { d: 500, data: EnemyCases.batSimpleLeft },
-          { d: 500, data: EnemyCases.batSimpleRight },
-          { d: 500, data: EnemyCases.batSimpleLeft },
+          {
+            d: 2000,
+            data: {
+              sw: {
+                quantity: 5,
+                delay: 200,
+                type: EnemyCases.batSimpleRightTween,
+                bonus: { type: "bonus-fire", enemy: 5 },
+                tween: { tweenY: 50, tweenDuration: 1000 },
+                y: 400,
+              },
+            },
+          },
 
           {
             d: 2000,
@@ -510,19 +571,7 @@ export let GameData: any = {
 
           { d: 500, data: EnemyCases.witchSimpleRight },
           { d: 500, data: EnemyCases.ghostSimpleLeft },
-          {
-            d: 1000,
-            data: {
-              sw: {
-                quantity: 5,
-                delay: 200,
-                type: EnemyCases.batSimpleRightTween,
-                bonus: { type: "milk", enemy: 5 },
-                tween: { tweenY: 100, tweenDuration: 1000 },
-                y: 300,
-              },
-            },
-          },
+
           { d: 500, data: EnemyCases.witchSimpleRight },
 
           {
@@ -554,9 +603,19 @@ export let GameData: any = {
           { d: 1000, data: EnemyCases.ghastSimpleRight },
           { d: 1000, data: EnemyCases.witchSimpleRight },
           { d: 1000, data: EnemyCases.ghastSimpleLeft },
-          { d: 1000, data: EnemyCases.ghastSimpleRight },
-          { d: 1000, data: EnemyCases.batSimpleLeft },
-          { d: 1000, data: EnemyCases.ghastSimpleRight },
+          {
+            d: 3000,
+            data: {
+              sw: {
+                quantity: 5,
+                delay: 200,
+                type: EnemyCases.batSimpleRightTween,
+                bonus: { type: "bonus-live", enemy: 5 },
+                tween: { tweenY: 50, tweenDuration: 1000 },
+                y: 400,
+              },
+            },
+          },
           { d: 1000, data: EnemyCases.ghastSimpleLeft },
           { d: 1000, data: EnemyCases.ghastSimpleRight },
           { d: 1000, data: EnemyCases.ghastSimpleLeft },
@@ -586,10 +645,19 @@ export let GameData: any = {
 
           { d: 1000, data: EnemyCases.ghastSimpleRight },
           { d: 1000, data: EnemyCases.ghastSimpleRight },
-          { d: 1000, data: EnemyCases.ghastSimpleLeft },
-          { d: 1000, data: EnemyCases.batSimpleRight },
-          { d: 1000, data: EnemyCases.ghastSimpleLeft },
-          { d: 1000, data: EnemyCases.ghastSimpleRight },
+          {
+            d: 5000,
+            data: {
+              sw: {
+                quantity: 5,
+                delay: 200,
+                type: EnemyCases.batSimpleRightTween,
+                bonus: { type: "bonus-invulnerability", enemy: 5 },
+                tween: { tweenY: 50, tweenDuration: 1000 },
+                y: 400,
+              },
+            },
+          },
           { d: 1000, data: EnemyCases.witchSimpleLeft },
           { d: 1000, data: EnemyCases.ghastSimpleRight },
           { d: 1000, data: EnemyCases.ghastSimpleLeft },
@@ -608,19 +676,7 @@ export let GameData: any = {
 
           { d: 500, data: EnemyCases.ghastSimpleLeft },
           { d: 500, data: EnemyCases.batSimpleRight },
-          {
-            d: 1000,
-            data: {
-              sw: {
-                quantity: 5,
-                delay: 200,
-                type: EnemyCases.batSimpleRightTween,
-                bonus: { type: "milk", enemy: 5 },
-                tween: { tweenY: 100, tweenDuration: 1000 },
-                y: 100,
-              },
-            },
-          },
+
           { d: 500, data: EnemyCases.ghastSimpleLeft },
 
           {
@@ -633,10 +689,19 @@ export let GameData: any = {
               },
             },
           },
-          { d: 0, data: EnemyCases.witchSimpleRightTween },
-          { d: 0, data: EnemyCases.ghastSimpleLeftTween },
-          { d: 0, data: EnemyCases.batSimpleRightTween },
-          { d: 0, data: EnemyCases.batSimpleLeftTween },
+          {
+            d: 2000,
+            data: {
+              sw: {
+                quantity: 5,
+                delay: 200,
+                type: EnemyCases.batSimpleRightTween,
+                bonus: { type: "bonus-fire", enemy: 5 },
+                tween: { tweenY: 50, tweenDuration: 1000 },
+                y: 400,
+              },
+            },
+          },
           {
             d: 2000,
             data: {
@@ -717,20 +782,6 @@ export let GameData: any = {
           { d: 1000, data: EnemyCases.pumpSimpleLeft },
           { d: 1000, data: EnemyCases.batSimpleRight },
           { d: 1000, data: EnemyCases.pumpSimpleLeft },
-          {
-            a: 10,
-            d: 1000,
-            data: {
-              sw: {
-                quantity: 5,
-                delay: 200,
-                type: EnemyCases.batSimpleRightTween,
-                bonus: { type: "milk", enemy: 5 },
-                tween: { tweenY: 100, tweenDuration: 1000 },
-                y: 500,
-              },
-            },
-          },
           { d: 1000, data: EnemyCases.ghastSimpleRight },
           { d: 1000, data: EnemyCases.witchSimpleLeft },
           { d: 1000, data: EnemyCases.pumpSimpleRight },
@@ -1253,10 +1304,39 @@ export let GameData: any = {
       spacing: 2,
     },*/
     {
-      name: "milk",
-      path: "assets/images/milk.png",
+      name: "bonus-damage",
+      path: "assets/images/bonus-milk.png",
+      width: 42,
+      height: 81,
+      frames: 2,
+    },
+    {
+      name: "bonus-invulnerability",
+      path: "assets/images/bonus-mask.png",
+      width: 52,
+      height: 58,
+      frames: 2,
+    },
+    {
+      name: "bonus-velocity",
+      path: "assets/images/bonus-broom.png",
+      width: 48,
+      height: 96,
+      frames: 2,
+    },
+    {
+      name: "bonus-live",
+      path: "assets/images/bonus-heart.png",
       width: 40,
-      height: 80,
+      height: 40,
+      frames: 2,
+    },
+
+    {
+      name: "bonus-fire",
+      path: "assets/images/bonus-fire.png",
+      width: 44,
+      height: 66,
       frames: 2,
     },
 
@@ -1428,6 +1508,10 @@ export let GameData: any = {
     {
       name: "boss-base",
       path: "assets/images/boss-base.png",
+    },
+    {
+      name: "share",
+      path: "assets/images/share.png",
     },
 
     {

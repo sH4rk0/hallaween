@@ -310,7 +310,12 @@ export default class Enemy extends Phaser.GameObjects.Sprite {
       this._scene.updateBonusObj(this._config.itemData.data.bonus.enemy);
       if (this._scene.isBonusObjAvailable()) {
         this._scene.addToEnemyGroup(
-          new Bonus({ scene: this._scene, x: this.x, y: this.y, key: "milk" })
+          new Bonus({
+            scene: this._scene,
+            x: this.x,
+            y: this.y,
+            key: this._config.itemData.data.bonus.type,
+          })
         );
 
         this._scene.resetBonusObj();

@@ -1,3 +1,5 @@
+import SceneTransition from "../scenes/SceneTransition";
+
 export default class Hud extends Phaser.Scene {
   private _scoreText: Phaser.GameObjects.Text;
   private _score: number = 0;
@@ -26,6 +28,7 @@ export default class Hud extends Phaser.Scene {
 
   private _bossMaxHit: number = 0;
   private _bossDamage: number = 0;
+  private _transition: SceneTransition;
 
   constructor() {
     super({
@@ -36,6 +39,7 @@ export default class Hud extends Phaser.Scene {
   preload() {}
 
   create() {
+    this._transition = <SceneTransition>this.scene.get("SceneTransition");
     this._lives = [];
     this._livesCounter = 0;
     this._startingLives = 3;
@@ -91,6 +95,9 @@ export default class Hud extends Phaser.Scene {
 
     this._gamePlay.events.off("lose-live", this.removeLive, this);
     this._gamePlay.events.on("lose-live", this.removeLive, this);
+
+    this._gamePlay.events.off("bonus-live", this.bonusLive, this);
+    this._gamePlay.events.on("bonus-live", this.bonusLive, this);
 
     this._gamePlay.events.off("update-score", this.updateScore, this);
     this._gamePlay.events.on("update-score", this.updateScore, this);
@@ -201,6 +208,12 @@ export default class Hud extends Phaser.Scene {
     this.registry.set("lives", this._livesCounter);
   }
 
+  bonusLive() {
+    this._scoreLives++;
+    this.sound.playAudioSprite("sfx", "1up");
+    this.addLive(this._livesCounter);
+  }
+
   removeLive() {
     this._lives[this._livesCounter - 1].destroy();
     this._lives.splice(this._livesCounter - 1, 1);
@@ -216,9 +229,7 @@ export default class Hud extends Phaser.Scene {
     const _addLive: number = Math.floor(this._score / this._newLive);
 
     if (_addLive > this._scoreLives) {
-      this._scoreLives++;
-      this.sound.playAudioSprite("sfx", "1up");
-      this.addLive(this._livesCounter);
+      this.bonusLive();
     }
   }
 
@@ -284,15 +295,18 @@ export default class Hud extends Phaser.Scene {
   }
 
   private gameOver() {
-    this._music.stop();
-    this.scene.stop("Hud");
-    this.scene.stop("GamePlay");
-    if (this.sys.game.device.input.touch) {
-      this.scene.stop("Joy");
-    }
-    this.scene.start("GameOver");
-    this.scene.start("ScoreInput");
-    this.scene.bringToTop("GameOver");
-    this.scene.bringToTop("ScoreInput");
+    this._transition.appear(true, () => {
+      this._music.stop();
+      this.scene.stop("Hud");
+      this.scene.stop("GamePlay");
+      if (this.sys.game.device.input.touch) {
+        this.scene.stop("Joy");
+      }
+      this.scene.start("GameOver");
+      this.scene.start("ScoreInput");
+      this.scene.bringToTop("GameOver");
+      this.scene.bringToTop("ScoreInput");
+      this.scene.bringToTop("SceneTransition");
+    });
   }
 }

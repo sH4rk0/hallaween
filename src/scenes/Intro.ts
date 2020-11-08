@@ -1,4 +1,5 @@
 import { leaderboard } from "../InitGame";
+import SceneTransition from "../scenes/SceneTransition";
 
 export default class Intro extends Phaser.Scene {
   private _play: Phaser.GameObjects.Text;
@@ -19,6 +20,7 @@ export default class Intro extends Phaser.Scene {
   private _highscoresText: Array<Phaser.GameObjects.BitmapText>;
 
   private _music: Phaser.Sound.BaseSound;
+  private _thunder: Phaser.Sound.BaseSound;
   private _allauin: Phaser.Sound.BaseSound;
   private _status: number;
   private _highscoresColors: Array<number> = [
@@ -39,6 +41,12 @@ export default class Intro extends Phaser.Scene {
   private _body: Phaser.GameObjects.Image;
   private _arm: Phaser.GameObjects.Image;
   private _face: Phaser.GameObjects.Sprite;
+  private _transition: SceneTransition;
+  private _gamepad: Phaser.Input.Gamepad.Gamepad;
+  private _menuStatus: number;
+  private _infoOpen: boolean;
+  private _gamepadmoved: boolean;
+  private _gamepadpressed: boolean;
 
   constructor() {
     super({
@@ -57,6 +65,11 @@ export default class Intro extends Phaser.Scene {
 
   create() {
     //console.log("create intro");
+    this._gamepadmoved = false;
+    this._gamepadpressed = false;
+    this._infoOpen = false;
+    this._transition = <SceneTransition>this.scene.get("SceneTransition");
+    this._menuStatus = -1;
     this._bossFaces = [];
     this._bossTexts = [];
 
@@ -68,10 +81,7 @@ export default class Intro extends Phaser.Scene {
 
     this.cameras.main.setBackgroundColor("#000000");
 
-    this._hallaweenLogo = this.add
-      .image(640, 100, "hallaween")
-
-      .setAlpha(0);
+    this._hallaweenLogo = this.add.image(640, 100, "hallaween").setAlpha(0);
 
     this.input.keyboard.on("keydown-O", (event: Event) => {
       this.game.renderer.snapshot((image: any) => {
@@ -128,6 +138,21 @@ export default class Intro extends Phaser.Scene {
       .on("pointerup", () => {
         this.closeHowToPlay();
       });
+
+    /*SHARE 
+    -----------------------------------------------------*/
+    if (this.sys.game.device.input.touch) {
+      let _share = this.add
+        .image(1260, 20, "share")
+        .setInteractive()
+        .setOrigin(1, 0)
+        .on("pointerup", () => {
+          window.open(
+            "https://wa.me/?text=Help%20the%20Governor%20to%20kill%20the%20HALLAWEEN%20Spirit-https%3A%2F%2Fsh4rko.itch.io%2Fhallaween",
+            "_blank"
+          );
+        });
+    }
 
     /*CREDITS 
     -----------------------------------------------------*/
@@ -320,7 +345,8 @@ export default class Intro extends Phaser.Scene {
     }
 
     //this.add.image(0, 0, "bg").setOrigin(0);
-
+    /*PLAY button 
+    ____________________________________________________________________*/
     _config = {
       font: "40px",
       fill: "#ff8200",
@@ -338,18 +364,7 @@ export default class Intro extends Phaser.Scene {
       .setDepth(100)
 
       .on("pointerup", () => {
-        if (this._music != undefined) this._music.stop();
-        if (this._allauin != undefined) this._allauin.stop();
-        this.scene.stop("Intro");
-
-        this.scene.start("GamePlay");
-        this.scene.bringToTop("GamePlay");
-        this.scene.start("Hud");
-        this.scene.bringToTop("Hud");
-        if (this.sys.game.device.input.touch) {
-          this.scene.start("Joy");
-          this.scene.bringToTop("Joy");
-        }
+        this.startGame();
       })
       .on("pointerover", () => {
         this._play.setFill("#ff0000");
@@ -476,8 +491,8 @@ export default class Intro extends Phaser.Scene {
             this._hallaweenLogo.setAlpha(1);
             this._face.setFrame(17);
             this._arm.setFrame(0);
-            let _thunder: Phaser.Sound.BaseSound = this.sound.add("thunder");
-            _thunder.play(undefined, {
+            this._thunder = this.sound.add("thunder");
+            this._thunder.play(undefined, {
               loop: false,
               volume: 0.5,
             });
@@ -639,7 +654,131 @@ export default class Intro extends Phaser.Scene {
     this._play.setY(-20);
   }
 
-  update(time: number, delta: number) {}
+  startGame() {
+    this._transition.appear(true, () => {
+      if (this._music != undefined) this._music.stop();
+      if (this._allauin != undefined) this._allauin.stop();
+      if (this._thunder != undefined) this._thunder.stop();
+      this.scene.stop("Intro");
+      this.scene.start("GamePlay");
+      this.scene.bringToTop("GamePlay");
+      this.scene.start("Hud");
+      this.scene.bringToTop("Hud");
+      if (this.sys.game.device.input.touch) {
+        this.scene.start("Joy");
+        this.scene.bringToTop("Joy");
+        this.scene.bringToTop("SceneTransition");
+      }
+    });
+  }
+
+  update(time: number, delta: number) {
+    if (this.input.gamepad.total > 0 && this._gamepad == undefined) {
+      this._gamepad = this.input.gamepad.gamepads[0];
+    } else if (this.input.gamepad.total > 0 && this._gamepad != undefined) {
+      if (
+        this._gamepad != null &&
+        this._gamepad.axes[0].getValue() == -1 &&
+        !this._gamepadmoved &&
+        !this._infoOpen
+      ) {
+        this._gamepadmoved = true;
+        this._menuStatus++;
+        if (this._menuStatus > 3) this._menuStatus = 0;
+        this.setMenuColor();
+      } else if (
+        this._gamepad != null &&
+        this._gamepad.axes[0].getValue() == 1 &&
+        !this._gamepadmoved &&
+        !this._infoOpen
+      ) {
+        this._gamepadmoved = true;
+        this._menuStatus--;
+        if (this._menuStatus < 0) this._menuStatus = 3;
+        this.setMenuColor();
+      } else if (
+        this._gamepad != null &&
+        this._gamepad.axes[0].getValue() == 0
+      ) {
+        this._gamepadmoved = false;
+      }
+
+      if (
+        this._gamepad != null &&
+        this._gamepad.buttons[0].value == 1 &&
+        !this._gamepadpressed
+      ) {
+        switch (this._menuStatus) {
+          case 0: //play
+            this.startGame();
+            this._gamepadpressed = true;
+
+            break;
+          case 1: //credits
+            this.openCredits();
+            this._gamepadpressed = true;
+            this._infoOpen = true;
+            break;
+          case 2: //howtoplay
+            this.openHowToPlay();
+            this._gamepadpressed = true;
+            this._infoOpen = true;
+            break;
+          case 3: //ouas
+            this.openOuas();
+            this._gamepadpressed = true;
+            this._infoOpen = true;
+            break;
+        }
+      } else if (
+        this._gamepad != null &&
+        this._gamepad.buttons[1].value == 1 &&
+        this._menuStatus == 1
+      ) {
+        this.closeCredits();
+        this._gamepadpressed = false;
+        this._infoOpen = false;
+      } else if (
+        this._gamepad != null &&
+        this._gamepad.buttons[1].value == 1 &&
+        this._menuStatus == 2
+      ) {
+        this.closeHowToPlay();
+        this._gamepadpressed = false;
+        this._infoOpen = false;
+      } else if (
+        this._gamepad != null &&
+        this._gamepad.buttons[1].value == 1 &&
+        this._menuStatus == 3
+      ) {
+        this.closeOuas();
+        this._gamepadpressed = false;
+        this._infoOpen = false;
+      }
+    }
+  }
+
+  setMenuColor() {
+    this._ouasText.clearTint();
+    this._creditsText.clearTint();
+    this._howtoplayText.clearTint();
+    this._play.setFill("#ff8200");
+
+    switch (this._menuStatus) {
+      case 0:
+        this._play.setFill("#ff0000");
+        break;
+      case 1:
+        this._creditsText.setTint(0xff0000);
+        break;
+      case 2:
+        this._howtoplayText.setTint(0xff0000);
+        break;
+      case 3:
+        this._ouasText.setTint(0xff0000);
+        break;
+    }
+  }
 }
 
 /*

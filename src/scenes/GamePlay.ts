@@ -205,8 +205,25 @@ export default class GamePlay extends Phaser.Scene {
       isFirst: true,
     });
     this._groupBoss.add(this._boss);
-    */
+   
 
+    this._groupEnemy.add(
+      new Bonus({ scene: this, x: 640, y: 300, key: "bonus-damage" })
+    );
+    this._groupEnemy.add(
+      new Bonus({ scene: this, x: 740, y: 300, key: "bonus-fire" })
+    );
+    this._groupEnemy.add(
+      new Bonus({ scene: this, x: 840, y: 300, key: "bonus-invulnerability" })
+    );
+    this._groupEnemy.add(
+      new Bonus({ scene: this, x: 940, y: 300, key: "bonus-velocity" })
+    );
+
+    this._groupEnemy.add(
+      new Bonus({ scene: this, x: 1040, y: 300, key: "bonus-live" })
+    );
+  */
     this.start();
   }
 
@@ -221,7 +238,7 @@ export default class GamePlay extends Phaser.Scene {
   }
 
   bossDead() {
-    this._player.bossDead();
+    this._player.maskOff();
     this._hud.restartMusic();
     this.startScroll();
   }
@@ -247,7 +264,6 @@ export default class GamePlay extends Phaser.Scene {
   }
 
   resetBonusObj() {
-    console.log("reset");
     this._bonusObj = { hits: 0, enemy: 0 };
   }
   updateBonusObj(enemy: number) {
@@ -388,6 +404,7 @@ export default class GamePlay extends Phaser.Scene {
     this.registry.set("level", this._currentLevelIndex);
     if (this._levels[this._currentLevelIndex] == undefined) {
     } else {
+      this.savePlayerStatus();
       this._currentLevel = this._levels[this._currentLevelIndex].level;
       this.setupText({
         text: this._currentLevel.name,
@@ -395,6 +412,18 @@ export default class GamePlay extends Phaser.Scene {
         duration: 3000,
       });
     }
+  }
+
+  savePlayerStatus() {
+    localStorage.setItem(
+      "playerStatus",
+      JSON.stringify(this._player.getPlayerStatus())
+    );
+    // console.log(this._player.getPlayerStatus());
+  }
+
+  bonusLive() {
+    this.events.emit("bonus-live");
   }
 
   addItem(_isLast: boolean, _itemData: enemyData) {

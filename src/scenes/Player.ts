@@ -49,11 +49,17 @@ export default class Player extends Phaser.GameObjects.Container {
   private _charger: Phaser.GameObjects.Container;
   private _particle: Phaser.GameObjects.Particles.ParticleEmitterManager;
   private _particle2: Phaser.GameObjects.Particles.ParticleEmitterManager;
+  private _particleLockdown: Phaser.GameObjects.Particles.ParticleEmitterManager;
+
   private _emitter: Phaser.GameObjects.Particles.ParticleEmitter;
   private _emitterBlast: Phaser.GameObjects.Particles.ParticleEmitter;
+  private _emitterLockdown: Phaser.GameObjects.Particles.ParticleEmitter;
   private _isActiveCollision: boolean = true;
-  private _damagePlus: number = 0;
   private _yTimer: Phaser.Time.TimerEvent;
+
+  private _damagePlus: number = 0;
+  private _firePlus: number = 0;
+  private _velocityPlus: number = 0;
 
   constructor(params: playerConfig) {
     super(params.scene, params.x, params.y);
@@ -63,6 +69,20 @@ export default class Player extends Phaser.GameObjects.Container {
   }
 
   create() {
+    const _bonusStatus: any = localStorage.getItem("playerStatus");
+    if (_bonusStatus != null) {
+      let _statusObj: {
+        damage: number;
+        velocity: number;
+        fire: number;
+      } = JSON.parse(_bonusStatus);
+
+      // console.log(_statusObj);
+      if (_statusObj.damage > 0) this._damagePlus = _statusObj.damage;
+      if (_statusObj.velocity > 0) this._velocityPlus = _statusObj.velocity;
+      if (_statusObj.fire > 0) this._firePlus = _statusObj.fire;
+    }
+
     this._isActiveCollision = true;
     if (this._scene.registry.get("trainer")) this._trainer = true;
 
@@ -75,6 +95,7 @@ export default class Player extends Phaser.GameObjects.Container {
     this._chargeValue = 0;
     this._particle = this.scene.add.particles("sparkle");
     this._particle2 = this.scene.add.particles("sparkle");
+    this._particleLockdown = this.scene.add.particles("spark").setDepth(10001);
 
     var circle = new Phaser.Geom.Circle(0, 0, 40);
     let graphics = this.scene.add.graphics();
@@ -101,6 +122,20 @@ export default class Player extends Phaser.GameObjects.Container {
       speed: 400,
       quantity: 20,
       scale: { start: 1, end: 0 },
+      on: false,
+    });
+
+    this._emitterLockdown = this._particleLockdown.createEmitter({
+      alpha: { start: 1, end: 0 },
+      scale: { start: 0.2, end: 0 },
+      //tint: { start: 0xff945e, end: 0xff945e },
+      speed: 20,
+      accelerationY: -300,
+
+      lifespan: { min: 500, max: 600 },
+      blendMode: "ADD",
+      frequency: 10,
+
       on: false,
     });
 
@@ -210,16 +245,6 @@ export default class Player extends Phaser.GameObjects.Container {
     );
   }
 
-  bossDead() {
-    this._deluca.play("fly-no-mask");
-    this._scene.time.addEvent({
-      delay: 500,
-      callback: () => {
-        this._deluca.play("fly");
-      },
-    });
-  }
-
   startMovetimer() {
     if (this._yTimer != null) {
       this._yTimer.remove();
@@ -232,6 +257,14 @@ export default class Player extends Phaser.GameObjects.Container {
     });
   }
 
+  getPlayerStatus() {
+    return {
+      damage: this._damagePlus,
+      velocity: this._velocityPlus,
+      fire: this._firePlus,
+    };
+  }
+
   deactivate() {
     this._input = false;
     //@ts-ignore
@@ -241,6 +274,16 @@ export default class Player extends Phaser.GameObjects.Container {
   maskOn() {
     //if (this._deluca != null)
     this._deluca.play("fly-mask");
+  }
+
+  maskOff() {
+    this._deluca.play("fly-no-mask");
+    this._scene.time.addEvent({
+      delay: 500,
+      callback: () => {
+        this._deluca.play("fly");
+      },
+    });
   }
 
   attachStick() {
@@ -284,7 +327,7 @@ export default class Player extends Phaser.GameObjects.Container {
   }
 
   hit(boss: boolean) {
-    this._isActiveCollision = false;
+    // this._isActiveCollision = false;
     //console.log(boss);
     if (boss) {
       // console.log("rimbalza");
@@ -308,22 +351,32 @@ export default class Player extends Phaser.GameObjects.Container {
       this._scene.sound.playAudioSprite("sfx", "ahhh");
       this.engineDown();
     } else {
-      this._scene.tweens.add({
-        targets: this,
-        repeat: 30,
-        yoyo: true,
-        duration: 50,
-        alpha: 0.1,
-        onComplete: () => {
-          this._isActiveCollision = true;
-        },
-      });
-
+      this.setInvulnerability(1500, false);
       this._scene.sound.playAudioSprite(
         "sfx",
         Phaser.Math.RND.pick(["allora", "nientedimeno"])
       );
     }
+  }
+
+  setInvulnerability(_time: number, _mask: boolean) {
+    //console.log("set inv");
+    if (_mask) this.maskOn();
+    this._isActiveCollision = false;
+    let _repeat = _time / 50;
+
+    //console.log(_repeat);
+    this._scene.tweens.add({
+      targets: this,
+      repeat: _repeat,
+      yoyo: true,
+      duration: 50,
+      alpha: 0.1,
+      onComplete: () => {
+        if (_mask) this.maskOff();
+        this._isActiveCollision = true;
+      },
+    });
   }
 
   isFiring(): boolean {
@@ -353,13 +406,14 @@ export default class Player extends Phaser.GameObjects.Container {
 
     if (this.fireIsDown()) {
       switch (true) {
-        case this._chargeValue == 20:
+        case this._chargeValue == 50:
           this._emitter.start();
 
           break;
 
         case this._chargeValue >= 110:
           this._emitter.stop();
+          this._emitterLockdown.startFollow(this, 50, 34).start();
           break;
       }
 
@@ -367,30 +421,40 @@ export default class Player extends Phaser.GameObjects.Container {
         this._chargeStartFrequency - this._chargeValue / 2
       );
 
-      this._isFiring = true;
       this._chargeValue++;
     } else {
       if (this._chargeValue > 0) {
         switch (true) {
-          case this._chargeValue < 50:
+          case this._chargeValue < 50 && !this._isFiring:
             this._chargeLevel = 1;
             this._shootDamage = 1 + this._damagePlus;
+            if (!this._isFiring) this.fireShot();
+            this._isFiring = true;
+            this._scene.time.addEvent({
+              delay: 400 - this._firePlus,
+              callback: () => {
+                this._isFiring = false;
+              },
+            });
+
             break;
 
           case this._chargeValue >= 50 && this._chargeValue < 80:
             this._chargeLevel = 1.5;
             this._shootDamage = 3 + this._damagePlus;
+            this.fireShot();
             break;
 
           case this._chargeValue >= 80 && this._chargeValue < 110:
             this._chargeLevel = 2;
             this._shootDamage = 6 + this._damagePlus;
+            this.fireShot();
             break;
 
           case this._chargeValue >= 110:
             this._chargeLevel = 2;
             this._shootDamage = 14 + this._damagePlus;
-
+            this._emitterLockdown.stop();
             this._scene.sound.playAudioSprite(
               "sfx",
               Phaser.Math.RND.pick(["lockdown1", "lockdown2"]),
@@ -399,66 +463,59 @@ export default class Player extends Phaser.GameObjects.Container {
                 volume: 0.7,
               }
             );
-
+            this.fireShot();
             break;
         }
 
-        new PlayerShot({
-          scene: this.scene,
-          x: this.x + this._chargerOffsetX,
-          y: this.y + this._chargerOffsetY,
-          key: "bullet",
-          direction: false,
-          level: this._chargeLevel,
-          charge: this._chargeValue,
-          damage: this._shootDamage,
-        });
+        this._chargeLevel = 1;
+        this._chargeValue = 0;
+        this._emitter.stop();
       }
-
-      this._chargeLevel = 1;
-      this._chargeValue = 0;
-
-      this._scene.time.addEvent({
-        delay: 200,
-        callback: () => {
-          this._isFiring = false;
-        },
-      });
-
-      this._emitter.stop();
     }
 
     if (this._A.isDown || this._LEFT.isDown) {
       //@ts-ignore
-      this.body.setVelocityX(-400);
+      this.body.setVelocityX(-300 + -this._velocityPlus);
     }
     if (this._D.isDown || this._RIGHT.isDown) {
       //@ts-ignore
-      this.body.setVelocityX(400);
+      this.body.setVelocityX(300 + this._velocityPlus);
     }
     if (this._W.isDown || this._UP.isDown) {
       //@ts-ignore
-      this.body.setVelocityY(-400);
+      this.body.setVelocityY(-300 + -this._velocityPlus);
       this.startMovetimer();
     }
     if (this._S.isDown || this._DOWN.isDown) {
       //@ts-ignore
-      this.body.setVelocityY(400);
+      this.body.setVelocityY(300 + this._velocityPlus);
       this.startMovetimer();
     }
 
     //this.startMovetimer();
   }
 
+  fireShot() {
+    new PlayerShot({
+      scene: this.scene,
+      x: this.x + this._chargerOffsetX,
+      y: this.y + this._chargerOffsetY,
+      key: "bullet",
+      direction: false,
+      level: this._chargeLevel,
+      charge: this._chargeValue,
+      damage: this._shootDamage,
+    });
+  }
+
   fireIsDown(): boolean {
-    //if (this._isFiring) return false;
-    if (this._gamepad != null && this._gamepad.buttons[0].value == 1) {
-      return true;
-    }
-    if (this._JoyScene == undefined) {
-      if (this._SPACE.isDown) return true;
-      return false;
-    } else if (this._JoyScene.button1 && this._JoyScene.button1.isDown) {
+    if (
+      (this._gamepad != null && this._gamepad.buttons[0].value == 1) ||
+      this._SPACE.isDown ||
+      (this._JoyScene != null &&
+        this._JoyScene.button1 &&
+        this._JoyScene.button1.isDown)
+    ) {
       return true;
     } else {
       return false;
@@ -467,6 +524,12 @@ export default class Player extends Phaser.GameObjects.Container {
 
   increaseDamage() {
     this._damagePlus += 1;
+  }
+  increaseSpeed() {
+    this._velocityPlus += 50;
+  }
+  increaseFire() {
+    this._firePlus += 50;
   }
 
   handleGamePadInput() {
